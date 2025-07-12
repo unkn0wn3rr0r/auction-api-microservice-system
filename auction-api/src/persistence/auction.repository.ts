@@ -1,0 +1,50 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { Collection, Db, ObjectId } from 'mongodb';
+import { AuctionItem } from 'src/models/auction-item';
+import { MONGO_CLIENT } from './mongo-client';
+
+@Injectable()
+export class AuctionRepository {
+  private auctionCollection: Collection<AuctionItem>;
+
+  constructor(@Inject(MONGO_CLIENT) private readonly db: Db) {
+    this.auctionCollection = this.db.collection<AuctionItem>('auction_items');
+  }
+
+  async findAuctionItemById(id: string): Promise<AuctionItem | null> {
+    return this.auctionCollection.findOne({ _id: new ObjectId(id) });
+  }
+
+  async findAllAuctionItems(limit = 10, skip = 0): Promise<AuctionItem[]> {
+    return this.auctionCollection.find().skip(skip).limit(limit).toArray();
+  }
+
+  async createAuctionItem(item: AuctionItem): Promise<AuctionItem> {
+    const result = await this.auctionCollection.insertOne({
+      ...item,
+      _id: new ObjectId(),
+    });
+    if (!result.acknowledged) {
+      throw new Error(`Creating auction item - ${item.title} failed`);
+    }
+    return { ...item, _id: result.insertedId };
+  }
+
+  async searchAuctionItems(query: string): Promise<AuctionItem[]> {
+    return this.auctionCollection
+      .find({
+        $or: [
+          { title: { $regex: query, $options: 'i' } },
+          { description: { $regex: query, $options: 'i' } },
+        ],
+      })
+      .toArray();
+  }
+
+  async insertCsvData(items: AuctionItem[]): Promise<void> {
+    await this.auctionCollection.insertMany(items);
+  }
+}
+
+// docker-compose up --build
+// docker-compose down -v && docker-compose up --build - this deletes the db
