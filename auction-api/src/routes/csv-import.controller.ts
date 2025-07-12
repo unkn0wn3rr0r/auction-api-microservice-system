@@ -34,7 +34,7 @@ const CSV_RELATIVE_PATH = join(cwd(), 'files', 'auction_data.csv');
     I will leave it as it is and eventually will go back to that, to see if I can think of some smart improvement here.
 */
 @Controller('/import')
-export class CsvImportController {
+export class ImportController {
     constructor(private readonly csvImportService: CsvImportService) { }
 
     @Post('/csv')

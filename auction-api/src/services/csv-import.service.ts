@@ -26,7 +26,7 @@ export class CsvImportService {
         .on('data', (row: AuctionItemCsvFormat) => {
           try {
             if (!row.title || !row.description || !row.category || !row.price || !row.status) {
-              this.logger.warn(`Skipped potential invalid CSV row ${row}`);
+              this.logger.warn(`Skipped potential invalid CSV row ${row.title}`);
               return;
             }
             items.push({
