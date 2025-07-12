@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Attach",
+            "port": 9229,
+            "request": "attach",
+            "sourceMaps": true,
+            "smartStep": true,
+            "trace": true,
+            "type": "node",
+            "localRoot": "${workspaceFolder}/auction-api/",
+            "remoteRoot": "/app",
+            "outFiles": [
+                "${workspaceFolder}/auction-api/dist/**/*.js"
+            ]
+        }
+    ]
+}
