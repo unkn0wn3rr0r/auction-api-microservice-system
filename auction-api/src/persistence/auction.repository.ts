@@ -1,10 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Collection, Db, ObjectId } from 'mongodb';
 import { AuctionItem } from 'src/models/auction-item';
 import { MONGO_CLIENT } from './mongo-client';
 
 @Injectable()
 export class AuctionRepository {
+  private readonly logger = new Logger(AuctionRepository.name);
   private auctionCollection: Collection<AuctionItem>;
 
   constructor(@Inject(MONGO_CLIENT) private readonly db: Db) {
@@ -42,7 +43,13 @@ export class AuctionRepository {
   }
 
   async insertCsvData(items: AuctionItem[]): Promise<void> {
-    await this.auctionCollection.insertMany(items);
+    const result = await this.auctionCollection.insertMany(items);
+    if (!result.acknowledged) {
+      throw new Error('Inserting CSV data failed');
+    }
+    if (result.insertedCount !== items.length) {
+      this.logger.warn(`There was a mismatch while inserting CSV data - ${result.insertedCount} out of ${items.length} items`);
+    }
   }
 }
 

@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { AuctionRepository } from './auction.repository';
 import { Collection, Db, InsertOneResult, ObjectId } from 'mongodb';
 import { AuctionItem } from 'src/models/auction-item';
@@ -6,6 +7,7 @@ describe('AuctionRepository', () => {
     let repository: AuctionRepository;
     let mockDb: Partial<Db>;
     let mockCollection: Partial<Collection<AuctionItem>>;
+    let mockLogger: Partial<Logger>;
 
     const mockAuctionItem = {
         _id: new ObjectId(),
@@ -26,11 +28,12 @@ describe('AuctionRepository', () => {
             insertMany: jest.fn(),
         };
 
-        mockDb = {
-            collection: jest.fn().mockReturnValue(mockCollection),
-        };
+        mockDb = { collection: jest.fn().mockReturnValue(mockCollection) };
+        mockLogger = { warn: jest.fn() };
 
         repository = new AuctionRepository(mockDb as Db);
+
+        Reflect.set(repository, 'logger', mockLogger); // that's a small trick i like to use, set the logger without changing the property from public to private
     });
 
     it('should find an auction item by ID', async () => {
@@ -95,10 +98,39 @@ describe('AuctionRepository', () => {
         });
     });
 
-    it('should insert CSV data', async () => {
-        await repository.insertCsvData([mockAuctionItem]);
+    describe('insertCsvData', () => {
+        const mockAuctionItems = [mockAuctionItem, { ...mockAuctionItem, id: '2' }];
 
-        expect(mockCollection.insertMany).toHaveBeenCalledWith([mockAuctionItem]);
-        expect(mockCollection.insertMany).toHaveBeenCalledTimes(1);
+        it('should insert CSV data successfully', async () => {
+            (mockCollection.insertMany as jest.Mock).mockResolvedValue({
+                acknowledged: true,
+                insertedCount: mockAuctionItems.length,
+            });
+
+            await expect(repository.insertCsvData(mockAuctionItems)).resolves.not.toThrow();
+
+            expect(mockCollection.insertMany).toHaveBeenCalledWith(mockAuctionItems);
+            expect(mockCollection.insertMany).toHaveBeenCalledTimes(1);
+        });
+
+        it('should throw error when insertion is not acknowledged', async () => {
+            (mockCollection.insertMany as jest.Mock).mockResolvedValue({
+                acknowledged: false,
+                insertedCount: 0,
+            });
+
+            await expect(repository.insertCsvData(mockAuctionItems)).rejects.toThrow('Inserting CSV data failed');
+        });
+
+        it('should log warning when insertedCount does not match items length', async () => {
+            (mockCollection.insertMany as jest.Mock).mockResolvedValue({
+                acknowledged: true,
+                insertedCount: 1, // only 1 item inserted out of 2
+            });
+
+            await repository.insertCsvData(mockAuctionItems);
+
+            expect(mockLogger.warn).toHaveBeenCalledWith(`There was a mismatch while inserting CSV data - 1 out of ${mockAuctionItems.length} items`);
+        });
     });
 });
