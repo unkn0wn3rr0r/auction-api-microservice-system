@@ -16,6 +16,8 @@ const readFileAsync = promisify(readFile);
     - the folder name is changes - that breaks
     - the csv data filename is changed - that breaks
     - the csv data is moved somewhere else or is remove that breaks
+
+    Of course this would be a problem if we frequently change folder/file names.
 */
 const CSV_RELATIVE_PATH = join(cwd(), 'files', 'auction_data.csv');
 
@@ -31,7 +33,6 @@ const CSV_RELATIVE_PATH = join(cwd(), 'files', 'auction_data.csv');
     to move on with a simpler implementation.
 
     Now the drawback with this approach and that /import/csv route is that the user can spam infinitely the db with data.
-    I will leave it as it is and eventually will go back to that, to see if I can think of some smart improvement here.
 */
 @Controller('/import')
 export class ImportController {
@@ -39,8 +40,12 @@ export class ImportController {
 
     @Post('/csv')
     async importCsv(): Promise<{ message: string; importedCount: number }> {
-        const buff = await readFileAsync(CSV_RELATIVE_PATH);
-        const importedCount = await this.csvImportService.importCsvData(buff);
-        return { message: 'Data import complete', importedCount };
+        try {
+            const buff = await readFileAsync(CSV_RELATIVE_PATH);
+            const importedCount = await this.csvImportService.importCsvData(buff);
+            return { message: 'Data import complete', importedCount };
+        } catch (error) {
+            return { message: error.message, importedCount: 0 };
+        }
     }
 }

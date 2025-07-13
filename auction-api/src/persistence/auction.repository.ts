@@ -62,6 +62,3 @@ export class AuctionRepository {
     }
   }
 }
-
-// docker-compose up --build
-// docker-compose down -v && docker-compose up --build - this deletes the db

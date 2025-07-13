@@ -18,6 +18,7 @@ COPY package*.json ./
 RUN npm install --omit=dev
 
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/files ./files
 
 ENV NODE_ENV=production
 
