@@ -28,8 +28,15 @@ describe('AuctionRepository', () => {
             insertMany: jest.fn(),
         };
 
-        mockDb = { collection: jest.fn().mockReturnValue(mockCollection) };
-        mockLogger = { warn: jest.fn() };
+        mockDb = {
+            collection: jest.fn().mockReturnValue(mockCollection),
+            command: jest.fn(),
+        };
+
+        mockLogger = {
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
 
         repository = new AuctionRepository(mockDb as Db);
 
@@ -137,5 +144,27 @@ describe('AuctionRepository', () => {
             expect(mockLogger.warn).toHaveBeenCalledWith(`There was a mismatch while inserting CSV data - 1 out of ${mockAuctionItems.length} items`);
             expect(mockLogger.warn).toHaveBeenCalledTimes(1);
         });
+    });
+
+    it('should return true when db is healthy', async () => {
+        (mockDb.command as jest.Mock).mockResolvedValue({ ok: 1 });
+
+        const result = await repository.isHealthy();
+
+        expect(result).toBe(true);
+        expect(mockDb.command).toHaveBeenCalledWith({ ping: 1 });
+        expect(mockDb.command).toHaveBeenCalledTimes(1);
+        expect(mockLogger.error).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return false when db is unhealthy', async () => {
+        (mockDb.command as jest.Mock).mockRejectedValue(new Error('Connection failed'));
+
+        const result = await repository.isHealthy();
+
+        expect(result).toBe(false);
+        expect(mockDb.command).toHaveBeenCalledTimes(1);
+        expect(mockLogger.error).toHaveBeenCalledWith('Health check failed: Connection failed');
+        expect(mockLogger.error).toHaveBeenCalledTimes(1);
     });
 });

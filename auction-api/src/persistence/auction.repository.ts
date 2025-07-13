@@ -51,6 +51,16 @@ export class AuctionRepository {
       this.logger.warn(`There was a mismatch while inserting CSV data - ${result.insertedCount} out of ${items.length} items`);
     }
   }
+
+  async isHealthy(): Promise<boolean> {
+    try {
+      const result = await this.db.command({ ping: 1 });
+      return result.ok === 1;
+    } catch (error) {
+      this.logger.error(`Health check failed: ${error.message}`);
+      return false;
+    }
+  }
 }
 
 // docker-compose up --build
