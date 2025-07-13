@@ -4,7 +4,7 @@ A RESTful auction house API system built with **Node.js**, **TypeScript**, **Nes
 
 ---
 
-## Features:
+# Features:
 
 - Create a new auction item
 - List items with pagination
@@ -18,7 +18,7 @@ A RESTful auction house API system built with **Node.js**, **TypeScript**, **Nes
 
 ---
 
-## Setup Instructions:
+# Setup Instructions:
 
 ### 1. Clone the repo and install dependencies:
 
@@ -48,24 +48,23 @@ Prerequisites:
 
 Steps:
 
-# Start Minikube
+### Start Minikube
 ```bash
 minikube start
 ```
 
-# Deploy Kubernetes manifests
+### Deploy Kubernetes manifests
 ```bash
 kubectl apply -f k8s/
 ```
 
-# Get external service URL
+### Get external service URL
 ```bash
 minikube service auction-api --url
 ```
 
 Then test for example the monitor endpoint by visiting:
-# Example: http://127.0.0.1:56789/monitor
-http://<minikube-url>/<api-endpoint>
+### Example: http://127.0.0.1:56789/monitor
 
 ### 4. Running Tests:
 
@@ -75,9 +74,9 @@ npm test
 
 ---
 
-### API Examples:
+# API Examples:
 
-# POST - Create new item
+### POST - Create new item
 ```bash
 curl -X POST http://localhost:3000/items/new \
   -H "Content-Type: application/json" \
@@ -90,34 +89,34 @@ curl -X POST http://localhost:3000/items/new \
   }'
 ```
 
-# POST - Import CSV data
+### POST - Import CSV data
 ```bash
 curl -X POST http://localhost:3000/import/csv
 ```
 
-# GET - Get item by ID - use mongo object id string as ID
+### GET - Get item details by ID - use mongo object id string as ID
 ```bash
 curl "http://localhost:3000/items/6873c5f005b0a564af54d12d"
 ```
 
-# GET - Get items with pagination
+### GET - Get items with pagination
 ```bash
 curl "http://localhost:3000/items?limit=1&skip=0"
 ```
 
-# GET - Search items
+### GET - Search items
 ```bash
 curl "http://localhost:3000/items/search?q=italian"
 ```
 
-# GET - Check if db is healthy - useful for k8s
+### GET - Check if db is healthy - useful for k8s
 ```bash
 curl "http://localhost:3000/monitor"
 ```
 
 ---
 
-### Brief Note on what you'd improve with more time:
+## Brief Note on what you'd improve with more time:
 
 1. Better import of the CSV data - through mongo on application startup, terminal command or something else.
 2. Usage of Data Transfer Objects (DTOs).
