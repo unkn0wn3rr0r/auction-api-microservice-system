@@ -111,6 +111,7 @@ describe('AuctionRepository', () => {
 
             expect(mockCollection.insertMany).toHaveBeenCalledWith(mockAuctionItems);
             expect(mockCollection.insertMany).toHaveBeenCalledTimes(1);
+            expect(mockLogger.warn).toHaveBeenCalledTimes(0);
         });
 
         it('should throw error when insertion is not acknowledged', async () => {
@@ -120,6 +121,8 @@ describe('AuctionRepository', () => {
             });
 
             await expect(repository.insertCsvData(mockAuctionItems)).rejects.toThrow('Inserting CSV data failed');
+            expect(mockCollection.insertMany).toHaveBeenCalledTimes(1);
+            expect(mockLogger.warn).toHaveBeenCalledTimes(0);
         });
 
         it('should log warning when insertedCount does not match items length', async () => {
@@ -130,7 +133,9 @@ describe('AuctionRepository', () => {
 
             await repository.insertCsvData(mockAuctionItems);
 
+            expect(mockCollection.insertMany).toHaveBeenCalledTimes(1);
             expect(mockLogger.warn).toHaveBeenCalledWith(`There was a mismatch while inserting CSV data - 1 out of ${mockAuctionItems.length} items`);
+            expect(mockLogger.warn).toHaveBeenCalledTimes(1);
         });
     });
 });
