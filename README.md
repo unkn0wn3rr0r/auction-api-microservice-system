@@ -48,22 +48,24 @@ Prerequisites:
 
 Steps:
 
-```bash
 # Start Minikube
+```bash
 minikube start
+```
 
 # Deploy Kubernetes manifests
+```bash
 kubectl apply -f k8s/
+```
 
 # Get external service URL
+```bash
 minikube service auction-api --url
 ```
 
 Then test for example the monitor endpoint by visiting:
-```bash
 # Example: http://127.0.0.1:56789/monitor
 http://<minikube-url>/<api-endpoint>
-```
 
 ### 4. Running Tests:
 
@@ -75,9 +77,8 @@ npm test
 
 ### API Examples:
 
-```bash
 # POST - Create new item
-
+```bash
 curl -X POST http://localhost:3000/items/new \
   -H "Content-Type: application/json" \
   -d '{
@@ -89,33 +90,28 @@ curl -X POST http://localhost:3000/items/new \
   }'
 ```
 
-```bash
 # POST - Import CSV data
-
+```bash
 curl -X POST http://localhost:3000/import/csv
 ```
 
-```bash
 # GET - Get item by ID - use mongo object id string as ID
-
+```bash
 curl "http://localhost:3000/items/6873c5f005b0a564af54d12d"
 ```
 
-```bash
 # GET - Get items with pagination
-
+```bash
 curl "http://localhost:3000/items?limit=1&skip=0"
 ```
 
-```bash
 # GET - Search items
-
+```bash
 curl "http://localhost:3000/items/search?q=italian"
 ```
 
-```bash
 # GET - Check if db is healthy - useful for k8s
-
+```bash
 curl "http://localhost:3000/monitor"
 ```
 
