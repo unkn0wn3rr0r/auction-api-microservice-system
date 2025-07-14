@@ -8,12 +8,12 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { AuctionItem } from 'src/models/auction-item';
+import { AuctionItem } from 'src/models/auction';
 import { AuctionService } from 'src/services/auction.service';
 
 @Controller('/items')
 export class AuctionController {
-  constructor(private readonly auctionService: AuctionService) { }
+  constructor(private readonly service: AuctionService) { }
 
   @Get('/')
   async findAll(
@@ -25,22 +25,22 @@ export class AuctionController {
     if (isNaN(l) || isNaN(s)) {
       throw new BadRequestException('limit and skip should be of type number');
     }
-    return this.auctionService.findAllAuctionItems(l, s);
+    return this.service.findAllAuctionItems(l, s);
   }
 
   @Post('/new')
   async create(@Body() item: AuctionItem): Promise<AuctionItem> {
-    return this.auctionService.createAuctionItem(item);
+    return this.service.createAuctionItem(item);
   }
 
   @Get('/search')
   async search(@Query('q') q: string): Promise<AuctionItem[]> {
-    return this.auctionService.searchAuctionItems(q);
+    return this.service.searchAuctionItems(q);
   }
 
   @Get('/:id')
   async findById(@Param('id') id: string): Promise<AuctionItem> {
-    const item = await this.auctionService.findAuctionItemById(id);
+    const item = await this.service.findAuctionItemById(id);
     if (item == null) {
       throw new NotFoundException(`Item with id: ${id} was not found.`);
     }

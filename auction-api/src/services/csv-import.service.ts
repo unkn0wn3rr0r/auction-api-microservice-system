@@ -1,8 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as csvParser from 'csv-parser';
 import { Readable } from 'stream';
-import { AuctionItem, AuctionItemCsvFormat } from 'src/models/auction-item';
-import { AuctionRepository } from 'src/persistence/auction.repository';
+import { AuctionItem, AuctionItemCsvFormat, AuctionRepository } from 'src/models/auction';
 
 /*
   That service can be improved by not coupling the headers to that exact format of names.

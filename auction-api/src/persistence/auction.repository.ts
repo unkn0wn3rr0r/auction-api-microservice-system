@@ -1,14 +1,15 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Collection, Db, ObjectId } from 'mongodb';
-import { AuctionItem } from 'src/models/auction-item';
+import { AuctionItem, AuctionRepository } from 'src/models/auction';
 import { MONGO_CLIENT } from './mongo-client';
 
 @Injectable()
-export class AuctionRepository {
-  private readonly logger = new Logger(AuctionRepository.name);
+export class MongoAuctionRepository extends AuctionRepository {
+  private readonly logger = new Logger(MongoAuctionRepository.name);
   private auctionCollection: Collection<AuctionItem>;
 
   constructor(@Inject(MONGO_CLIENT) private readonly db: Db) {
+    super();
     this.auctionCollection = this.db.collection<AuctionItem>('auction_items');
   }
 

@@ -11,11 +11,11 @@ import { MonitorService } from 'src/services/monitor.service';
 */
 @Controller('/monitor')
 export class MonitorController {
-    constructor(private readonly monitorService: MonitorService) { }
+    constructor(private readonly service: MonitorService) { }
 
     @Get()
     async checkHealth(): Promise<MonitorStatusResponse> {
-        const isDbHealthy = await this.monitorService.checkHealth();
+        const isDbHealthy = await this.service.checkHealth();
         return {
             status: isDbHealthy ? 'ok' : 'fail',
             details: {

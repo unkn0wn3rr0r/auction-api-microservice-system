@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: auction-api
-          image: kstoyanovw/auction-api:v1.3
+          image: kstoyanovw/auction-api:v1.4
           ports:
             - containerPort: 3000
           env:

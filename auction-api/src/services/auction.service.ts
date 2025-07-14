@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AuctionRepository } from 'src/persistence/auction.repository';
-import { AuctionItem } from 'src/models/auction-item';
+import { AuctionItem, AuctionRepository } from 'src/models/auction';
 
 @Injectable()
 export class AuctionService {

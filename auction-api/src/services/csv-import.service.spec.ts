@@ -1,6 +1,7 @@
+import { AuctionRepository } from 'src/models/auction';
 import { CsvImportService } from './csv-import.service';
-import { AuctionRepository } from 'src/persistence/auction.repository';
 import { Logger } from '@nestjs/common';
+import { MongoAuctionRepository } from 'src/persistence/auction.repository';
 
 describe('CsvImportService', () => {
     let mockRepo: Partial<Record<keyof AuctionRepository, jest.Mock>>;
@@ -11,7 +12,7 @@ describe('CsvImportService', () => {
             insertCsvData: jest.fn(),
         };
 
-        service = new CsvImportService(mockRepo as unknown as AuctionRepository);
+        service = new CsvImportService(mockRepo as unknown as MongoAuctionRepository);
         jest.spyOn(Logger.prototype, 'log').mockImplementation(() => { });
         jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => { });
         jest.spyOn(Logger.prototype, 'error').mockImplementation(() => { });

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuctionController } from './auction.controller';
 import { AuctionService } from 'src/services/auction.service';
-import { AuctionItem } from 'src/models/auction-item';
+import { AuctionItem } from 'src/models/auction';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('AuctionController', () => {

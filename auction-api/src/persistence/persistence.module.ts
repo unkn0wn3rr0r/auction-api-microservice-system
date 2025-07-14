@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MONGO_CLIENT, mongoClientProvider } from './mongo-client';
-import { AuctionRepository } from './auction.repository';
+import { MongoAuctionRepository } from './auction.repository';
+import { AuctionRepository } from '../models/auction';
 
 @Module({
   providers: [
@@ -8,7 +9,10 @@ import { AuctionRepository } from './auction.repository';
       provide: MONGO_CLIENT,
       useFactory: mongoClientProvider,
     },
-    AuctionRepository,
+    {
+      provide: AuctionRepository,
+      useClass: MongoAuctionRepository,
+    }
   ],
   exports: [AuctionRepository],
 })

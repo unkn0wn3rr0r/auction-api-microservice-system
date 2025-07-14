@@ -1,7 +1,8 @@
 import { Logger } from '@nestjs/common';
-import { AuctionRepository } from './auction.repository';
+
 import { Collection, Db, InsertOneResult, ObjectId } from 'mongodb';
-import { AuctionItem } from 'src/models/auction-item';
+import { AuctionItem, AuctionRepository } from 'src/models/auction';
+import { MongoAuctionRepository } from './auction.repository';
 
 describe('AuctionRepository', () => {
     let repository: AuctionRepository;
@@ -38,7 +39,7 @@ describe('AuctionRepository', () => {
             error: jest.fn(),
         };
 
-        repository = new AuctionRepository(mockDb as Db);
+        repository = new MongoAuctionRepository(mockDb as Db);
 
         Reflect.set(repository, 'logger', mockLogger); // that's a small trick i like to use, set the logger without changing the property from public to private
     });

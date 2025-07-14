@@ -36,13 +36,13 @@ const CSV_RELATIVE_PATH = join(cwd(), 'files', 'auction_data.csv');
 */
 @Controller('/import')
 export class ImportController {
-    constructor(private readonly csvImportService: CsvImportService) { }
+    constructor(private readonly service: CsvImportService) { }
 
     @Post('/csv')
     async importCsv(): Promise<{ message: string; importedCount: number }> {
         try {
             const buff = await readFileAsync(CSV_RELATIVE_PATH);
-            const importedCount = await this.csvImportService.importCsvData(buff);
+            const importedCount = await this.service.importCsvData(buff);
             return { message: 'Data import complete', importedCount };
         } catch (error) {
             return { message: error.message, importedCount: 0 };
