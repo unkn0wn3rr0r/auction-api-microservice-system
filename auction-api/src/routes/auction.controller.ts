@@ -8,6 +8,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
+import { ObjectId } from 'mongodb';
 import { AuctionItem } from 'src/models/auction';
 import { AuctionService } from 'src/services/auction.service';
 
@@ -34,12 +35,18 @@ export class AuctionController {
   }
 
   @Get('/search')
-  async search(@Query('q') q: string): Promise<AuctionItem[]> {
-    return this.service.searchAuctionItems(q);
+  async search(@Query('q') query: string): Promise<AuctionItem[]> {
+    if (!query?.trim()) {
+      throw new BadRequestException('Search query "q" must be provided.');
+    }
+    return this.service.searchAuctionItems(query);
   }
 
   @Get('/:id')
   async findById(@Param('id') id: string): Promise<AuctionItem> {
+    if (!ObjectId.isValid(id)) {
+      throw new BadRequestException(`Invalid id parameter: ${id}`);
+    }
     const item = await this.service.findAuctionItemById(id);
     if (item == null) {
       throw new NotFoundException(`Item with id: ${id} was not found.`);

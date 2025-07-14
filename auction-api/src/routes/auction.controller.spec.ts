@@ -3,6 +3,7 @@ import { AuctionController } from './auction.controller';
 import { AuctionService } from 'src/services/auction.service';
 import { AuctionItem } from 'src/models/auction';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { ObjectId } from 'mongodb';
 
 describe('AuctionController', () => {
     let controller: AuctionController;
@@ -62,32 +63,50 @@ describe('AuctionController', () => {
     });
 
     describe('search', () => {
+        it('should throw BadRequestException if search query is not provided', async () => {
+            await expect(controller.search('')).rejects.toThrow(new BadRequestException('Search query "q" must be provided.'));
+            await expect(controller.search('   ')).rejects.toThrow(new BadRequestException('Search query "q" must be provided.'));
+            await expect(controller.search(undefined as any)).rejects.toThrow(new BadRequestException('Search query "q" must be provided.'));
+            await expect(controller.search(null as any)).rejects.toThrow(new BadRequestException('Search query "q" must be provided.'));
+            expect(service.searchAuctionItems).toHaveBeenCalledTimes(0);
+        });
+
         it('should return array of items matching search query', async () => {
             const foundItems: AuctionItem[] = [{ id: '1', name: 'Found Item' } as unknown as AuctionItem];
             mockAuctionService.searchAuctionItems.mockResolvedValue(foundItems);
 
-            const result = await controller.search('query');
+            const result = await controller.search('porcelain');
             expect(result).toEqual(foundItems);
-            expect(service.searchAuctionItems).toHaveBeenCalledWith('query');
+            expect(service.searchAuctionItems).toHaveBeenCalledWith('porcelain');
             expect(service.searchAuctionItems).toHaveBeenCalledTimes(1);
         });
     });
 
     describe('findById', () => {
-        it('should return an auction item by id', async () => {
-            const item: AuctionItem = { id: '123', name: 'Item123' } as unknown as AuctionItem;
-            mockAuctionService.findAuctionItemById.mockResolvedValue(item);
+        it('should throw BadRequestException for invalid ObjectId', async () => {
+            await expect(controller.findById('invalid id')).rejects.toThrow(new BadRequestException('Invalid id parameter: invalid id'));
+            await expect(controller.findById('')).rejects.toThrow(new BadRequestException('Invalid id parameter: '));
 
-            const result = await controller.findById('123');
-            expect(result).toEqual(item);
-            expect(service.findAuctionItemById).toHaveBeenCalledWith('123');
-            expect(service.findAuctionItemById).toHaveBeenCalledTimes(1);
+            expect(service.findAuctionItemById).toHaveBeenCalledTimes(0);
         });
 
         it('should throw NotFoundException if item was not found', async () => {
+            const id = new ObjectId();
             mockAuctionService.findAuctionItemById.mockResolvedValue(null);
 
-            await expect(controller.findById('nonexistent-id')).rejects.toThrow(NotFoundException);
+            await expect(controller.findById(id.toHexString())).rejects.toThrow(NotFoundException);
+            expect(service.findAuctionItemById).toHaveBeenCalledTimes(1);
+        });
+
+        it('should return an auction item by id', async () => {
+            const id = new ObjectId();
+            const item: AuctionItem = { id, name: 'Item123' } as unknown as AuctionItem;
+            mockAuctionService.findAuctionItemById.mockResolvedValue(item);
+
+            const result = await controller.findById(id.toHexString());
+            expect(result).toEqual(item);
+            expect(service.findAuctionItemById).toHaveBeenCalledWith(id.toHexString());
+            expect(service.findAuctionItemById).toHaveBeenCalledTimes(1);
         });
     });
 });
