@@ -6,12 +6,20 @@ A RESTful auction house API system built with **Node.js**, **TypeScript**, **Nes
 
 # Features:
 
+### Auction Item Management API:
 - Create a new auction item
 - List items with pagination
 - Get single item details
 - Search items by text
-- CSV import functionality - another API endpoint
-- MongoDB native driver (no ORMs) as a database
+- CSV import functionality (via a dedicated API endpoint)
+
+### User Authentication API:
+- Register new users
+- Login with credentials
+- Validate JWT tokens
+
+### Other:
+- MongoDB native driver (no ORMs)
 - `/monitor` health check endpoint
 - Dockerized and Kubernetes-ready
 - Unit testing with Jest
