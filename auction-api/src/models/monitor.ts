@@ -1,9 +1,9 @@
 type MonitorStatus = 'ok' | 'fail';
-type DatabaseDetails = 'up' | 'down';
+type MonitorDetails = 'up' | 'down';
 
 export interface MonitorStatusResponse {
     status: MonitorStatus;
     details: {
-        db: DatabaseDetails;
+        db: MonitorDetails;
     };
 }

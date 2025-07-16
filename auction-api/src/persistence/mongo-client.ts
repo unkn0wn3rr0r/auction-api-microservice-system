@@ -1,9 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { MongoClient, Db } from 'mongodb';
-
-export const DATABASE_NAME = 'auctiondb';
-export const MONGO_CLIENT = Symbol('mongo-client');
-export const MONGO_URL = process.env.MONGO_URL ?? 'mongodb://db:27017';
+import { DATABASE_NAME, MONGO_URL } from 'src/utils/constants';
 
 export async function mongoClientProvider(): Promise<Db> {
   const logger = new Logger('MongoClientProvider');

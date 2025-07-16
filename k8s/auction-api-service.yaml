@@ -7,6 +7,11 @@ spec:
   selector:
     app: auction-api
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 80
       targetPort: 3000
+    - name: debug
+      protocol: TCP
+      port: 9229
+      targetPort: 9229

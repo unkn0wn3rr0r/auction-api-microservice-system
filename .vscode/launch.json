@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Attach",
+            "name": "Attach Auction",
             "port": 9229,
             "request": "attach",
             "sourceMaps": true,
@@ -10,9 +10,23 @@
             "trace": true,
             "type": "node",
             "localRoot": "${workspaceFolder}/auction-api/",
-            "remoteRoot": "/app",
+            "remoteRoot": "/auction-api/app",
             "outFiles": [
                 "${workspaceFolder}/auction-api/dist/**/*.js"
+            ]
+        },
+        {
+            "name": "Attach Auth",
+            "port": 9230,
+            "request": "attach",
+            "sourceMaps": true,
+            "smartStep": true,
+            "trace": true,
+            "type": "node",
+            "localRoot": "${workspaceFolder}/auth-api/",
+            "remoteRoot": "/auth-api/app",
+            "outFiles": [
+                "${workspaceFolder}/auth-api/dist/**/*.js"
             ]
         }
     ]

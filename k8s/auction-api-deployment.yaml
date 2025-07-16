@@ -14,9 +14,14 @@ spec:
     spec:
       containers:
         - name: auction-api
-          image: kstoyanovw/auction-api:v1.5
+          image: kstoyanovw/auction-api:v1.6
           ports:
             - containerPort: 3000
+            - containerPort: 9229 
           env:
+            - name: JWT_SECRET
+              value: "supersecurejwtsecret"
+            - name: JWT_EXPIRES_IN
+              value: "1h"
             - name: MONGODB_URI
-              value: mongodb://db:27017
+              value: mongodb://mongodb:27017/auction

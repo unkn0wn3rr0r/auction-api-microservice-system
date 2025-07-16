@@ -80,7 +80,7 @@ describe('AuctionRepository', () => {
         expect(mockCollection.insertOne).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw if createAuctionItem fails', async () => {
+    it('should throw an error if createAuctionItem fails', async () => {
         (mockCollection.insertOne as jest.Mock).mockResolvedValue({ acknowledged: false });
 
         await expect(
@@ -122,7 +122,7 @@ describe('AuctionRepository', () => {
             expect(mockLogger.warn).toHaveBeenCalledTimes(0);
         });
 
-        it('should throw error when insertion is not acknowledged', async () => {
+        it('should throw an error when insertion is not acknowledged', async () => {
             (mockCollection.insertMany as jest.Mock).mockResolvedValue({
                 acknowledged: false,
                 insertedCount: 0,

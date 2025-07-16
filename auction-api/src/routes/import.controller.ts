@@ -1,12 +1,14 @@
 import {
     Controller,
     Post,
+    UseGuards,
 } from '@nestjs/common';
 import { CsvImportService } from 'src/services/csv-import.service';
 import { readFile } from 'fs';
 import { join } from 'path';
 import { promisify } from 'util';
 import { cwd } from 'process';
+import { AuthGuard } from 'src/guards/auth.guards';
 
 const readFileAsync = promisify(readFile);
 
@@ -38,6 +40,7 @@ const CSV_RELATIVE_PATH = join(cwd(), 'files', 'auction_data.csv');
 export class ImportController {
     constructor(private readonly service: CsvImportService) { }
 
+    @UseGuards(AuthGuard)
     @Post('/csv')
     async importCsv(): Promise<{ message: string; importedCount: number }> {
         try {

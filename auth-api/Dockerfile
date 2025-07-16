@@ -1,7 +1,7 @@
 # Stage 1: build
 FROM node:20-alpine AS builder
 
-WORKDIR /auction-api/app
+WORKDIR /auth-api/app
 
 COPY package*.json ./
 RUN npm install
@@ -12,16 +12,15 @@ RUN npm run build
 # Stage 2: production
 FROM node:20-alpine
 
-WORKDIR /auction-api/app
+WORKDIR /auth-api/app
 
 COPY package*.json ./
 RUN npm install --omit=dev
 
-COPY --from=builder /auction-api/app/dist ./dist
-COPY --from=builder /auction-api/app/files ./files
+COPY --from=builder /auth-api/app/dist ./dist
 
 ENV NODE_ENV=production
 
-EXPOSE 3000
+EXPOSE 3001
 
 CMD ["node", "dist/main"]

@@ -25,11 +25,14 @@ A RESTful auction house API system built with **Node.js**, **TypeScript**, **Nes
 ```bash
 cd ./auction-api
 npm install
+
+cd ./auth-api
+npm install
 ```
 
 ### 2. Running Locally (with Docker Compose):
 
-From the project root:
+From the project root folder - ./Barnebys-Backend-Developer-Coding-Test run:
 ```bash
 docker-compose up --build
 ```
@@ -39,7 +42,7 @@ If you want to clear existing data:
 docker-compose down -v && docker-compose up --build
 ```
 
-### 3. Running on Kubernetes:
+### 3.❗Running on Kubernetes - Currently not working - broke it when I added the auth-api - WIP:❗
 
 Prerequisites:
 - [Docker](https://www.docker.com/)
@@ -69,12 +72,51 @@ Then test for example the monitor endpoint by visiting:
 ### 4. Running Tests:
 
 ```bash
+cd ./auction-api
+npm test
+
+cd ./auth-api
 npm test
 ```
 
 ---
 
 # API Examples:
+
+## auth-api
+
+### POST - register a user - you should first call this route to register a user and then call the /login route to get a token with which you can then be able to call the /import/csv route
+```bash
+curl -X POST http://localhost:3001/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "pass123"
+  }'
+```
+
+### POST - login with the registered user and get an access token
+```bash
+curl -X POST http://localhost:3001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "pass123"
+  }'
+```
+
+### POST - use the token from the /login route to check if it's valid
+```bash
+curl -X POST http://localhost:3001/auth/validate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "token": "<your-JWT-TOKEN>"
+  }'
+```
+
+---
+
+## auction-api
 
 ### POST - Create new item
 ```bash

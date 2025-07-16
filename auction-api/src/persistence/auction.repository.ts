@@ -1,16 +1,16 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Collection, Db, ObjectId } from 'mongodb';
 import { AuctionItem, AuctionRepository } from 'src/models/auction';
-import { MONGO_CLIENT } from './mongo-client';
+import { AUCTION_COLLECTION_NAME, MONGO_CLIENT } from 'src/utils/constants';
 
 @Injectable()
 export class MongoAuctionRepository extends AuctionRepository {
   private readonly logger = new Logger(MongoAuctionRepository.name);
-  private auctionCollection: Collection<AuctionItem>;
+  private readonly auctionCollection: Collection<AuctionItem>;
 
   constructor(@Inject(MONGO_CLIENT) private readonly db: Db) {
     super();
-    this.auctionCollection = this.db.collection<AuctionItem>('auction_items');
+    this.auctionCollection = this.db.collection<AuctionItem>(AUCTION_COLLECTION_NAME);
   }
 
   async findAuctionItemById(id: string): Promise<AuctionItem | null> {
