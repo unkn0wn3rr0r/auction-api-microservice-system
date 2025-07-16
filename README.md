@@ -110,7 +110,7 @@ curl -X POST http://localhost:3001/auth/login \
 curl -X POST http://localhost:3001/auth/validate \
   -H "Content-Type: application/json" \
   -d '{
-    "token": "<your-JWT-TOKEN>"
+    "token": "<YOUR-JWT-TOKEN>"
   }'
 ```
 
@@ -131,9 +131,11 @@ curl -X POST http://localhost:3000/items/new \
   }'
 ```
 
-### POST - Import CSV data
+### POST - Import CSV data - use a jwt created from the auth-api examples
 ```bash
-curl -X POST http://localhost:3000/import/csv
+curl -X POST http://localhost:3000/import/csv \
+  -H "Authorization: Bearer YOUR-JWT-TOKEN" \
+  -H "Content-Type: application/json"
 ```
 
 ### GET - Get item details by ID - use mongo object id string as ID

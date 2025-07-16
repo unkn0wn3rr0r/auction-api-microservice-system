@@ -16,6 +16,7 @@ services:
     command: npm run start:debug -- --preserveWatchOutput true
     depends_on:
       - mongodb
+      - auth-api
   auth-api:
     build:
       context: ./auth-api
