@@ -50,7 +50,7 @@ If you want to clear existing data:
 docker-compose down -v && docker-compose up --build
 ```
 
-### 3.❗Running on Kubernetes - Currently not working - broke it when I added the auth-api - WIP:❗
+### 3.❗Running on Kubernetes - Currently not working - WIP:❗
 
 Prerequisites:
 - [Docker](https://www.docker.com/)
@@ -75,7 +75,7 @@ minikube service auction-api --url
 ```
 
 Then test for example the monitor endpoint by visiting:
-### Example: http://127.0.0.1:56789/monitor
+### Example: http://localhost:56789/monitor
 
 ### 4. Running Tests:
 
