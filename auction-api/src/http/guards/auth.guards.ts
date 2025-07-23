@@ -5,25 +5,30 @@ import {
     UnauthorizedException,
     Logger,
 } from '@nestjs/common';
-import axios from 'axios';
+import { Request } from 'express';
+import { AuthTransportationService } from 'src/core/services/transport/auth.transportation.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+    private readonly logger = new Logger(AuthGuard.name);
+
+    constructor(private readonly service: AuthTransportationService) { }
+
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        const logger = new Logger('Auth-Guard'); // turn that into a class field
-        const request = context.switchToHttp().getRequest();
-        // extract auth grabbing in a function
-        const authHeader = request.headers['authorization'];
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            throw new UnauthorizedException('Missing or invalid Authorization header');
-        }
+        const request = context.switchToHttp().getRequest<Request>();
+        const token = extractJwt(request.headers['authorization']);
         try {
-            const token = authHeader.replace('Bearer ', '');
-            const response = await axios.post('http://auth-api:3001/auth/validate', { token }); // turn that into it's own service
-            return response.data.isValid;
+            return await this.service.validateToken(token);
         } catch (error) {
-            logger.error(`Auth guard failed: ${error.message}`);
+            this.logger.error(`Auth guard failed: ${error.message}`);
             throw new UnauthorizedException('Invalid token');
         }
     }
+}
+
+function extractJwt(header: string | undefined): string {
+    if (!header?.trim() || !header.startsWith('Bearer ')) {
+        throw new UnauthorizedException('Missing or invalid Authorization header');
+    }
+    return header.replace('Bearer ', '');
 }

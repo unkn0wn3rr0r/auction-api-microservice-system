@@ -1,17 +1,14 @@
 import { AuthGuard } from './auth.guards';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import axios from 'axios';
-
-jest.mock('axios');
+import { Test, TestingModule } from '@nestjs/testing';
+import { AuthTransportationService } from 'src/core/services/transport/auth.transportation.service';
 
 describe('AuthGuard', () => {
     let guard: AuthGuard;
+    let service: AuthTransportationService;
     let context: Partial<ExecutionContext>;
 
-    const mockedAxios = axios as jest.Mocked<typeof axios>;
-
-    beforeEach(() => {
-        guard = new AuthGuard();
+    beforeEach(async () => {
         context = {
             switchToHttp: jest.fn().mockReturnValue({
                 getRequest: jest.fn().mockReturnValue({
@@ -21,6 +18,21 @@ describe('AuthGuard', () => {
                 }),
             }),
         };
+
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                AuthGuard,
+                {
+                    provide: AuthTransportationService,
+                    useValue: {
+                        validateToken: jest.fn(),
+                    },
+                },
+            ],
+        }).compile();
+
+        guard = module.get(AuthGuard);
+        service = module.get(AuthTransportationService);
     });
 
     afterEach(() => {
@@ -37,7 +49,7 @@ describe('AuthGuard', () => {
         };
 
         await expect(guard.canActivate(contextNoAuthHeader as ExecutionContext)).rejects.toThrow(new UnauthorizedException('Missing or invalid Authorization header'));
-        expect(mockedAxios.post).toHaveBeenCalledTimes(0);
+        expect(service.validateToken).toHaveBeenCalledTimes(0);
     });
 
     it('should throw UnauthorizedException if Authorization header is invalid', async () => {
@@ -52,26 +64,53 @@ describe('AuthGuard', () => {
         };
 
         await expect(guard.canActivate(contextInvalidAuth as ExecutionContext)).rejects.toThrow(new UnauthorizedException('Missing or invalid Authorization header'));
-        expect(mockedAxios.post).toHaveBeenCalledTimes(0);
+        expect(service.validateToken).toHaveBeenCalledTimes(0);
     });
 
     it('should allow access when token is valid', async () => {
-        mockedAxios.post.mockResolvedValueOnce({ data: { isValid: true } });
+        (service.validateToken as jest.Mock).mockResolvedValueOnce(true);
 
         const result = await guard.canActivate(context as ExecutionContext);
         expect(result).toBe(true);
-        expect(mockedAxios.post).toHaveBeenCalledWith(
-            'http://auth-api:3001/auth/validate',
-            { token: 'valid.jwt.token' },
-        );
-        expect(mockedAxios.post).toHaveBeenCalledTimes(1);
+
+        expect(service.validateToken).toHaveBeenCalledWith('valid.jwt.token');
+        expect(service.validateToken).toHaveBeenCalledTimes(1);
     });
 
-    it('should deny access when token is invalid', async () => {
-        mockedAxios.post.mockRejectedValue(new Error('Invalid token'));
+    describe('When validateToken fails', () => {
+        let contextInvalidAuth: Partial<ExecutionContext>;
 
-        await expect(guard.canActivate(context as ExecutionContext)).rejects.toThrow(new UnauthorizedException('Invalid token'));
+        beforeEach(() => {
+            contextInvalidAuth = {
+                switchToHttp: jest.fn().mockReturnValue({
+                    getRequest: jest.fn().mockReturnValue({
+                        headers: {
+                            authorization: 'Bearer invalid',
+                        },
+                    }),
+                }),
+            };
+        });
 
-        expect(mockedAxios.post).toHaveBeenCalledTimes(1);
+        it('should deny access when token is invalid', async () => {
+            (service.validateToken as jest.Mock).mockResolvedValueOnce(false);
+
+            const result = await guard.canActivate(contextInvalidAuth as ExecutionContext);
+            expect(result).toBe(false);
+
+            expect(service.validateToken).toHaveBeenCalledWith('invalid');
+            expect(service.validateToken).toHaveBeenCalledTimes(1);
+        });
+
+        it('should throw UnauthorizedException when validateToken throws error', async () => {
+            (service.validateToken as jest.Mock).mockImplementation(() => {
+                throw new Error('Some unexpected error');
+            });
+
+            await expect(guard.canActivate(contextInvalidAuth as ExecutionContext)).rejects.toThrow(new UnauthorizedException('Invalid token'));
+
+            expect(service.validateToken).toHaveBeenCalledWith('invalid');
+            expect(service.validateToken).toHaveBeenCalledTimes(1);
+        });
     });
 });

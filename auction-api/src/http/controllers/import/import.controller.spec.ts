@@ -3,6 +3,8 @@ import { ImportController } from './import.controller';
 import { CsvImportService } from 'src/core/services/csv-import/csv-import.service';
 import { readFile } from 'fs';
 import { promisify } from 'util';
+import { AuthTransportationService } from 'src/core/services/transport/auth.transportation.service';
+import { HttpModule } from '@nestjs/axios';
 
 jest.mock('fs', () => ({
     readFile: jest.fn(),
@@ -19,17 +21,19 @@ describe('ImportController', () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
+            imports: [HttpModule], // need this for the AuthGuard
             controllers: [ImportController],
             providers: [
                 {
                     provide: CsvImportService,
                     useValue: mockCsvImportService,
                 },
+                AuthTransportationService,
             ],
         }).compile();
 
-        controller = module.get<ImportController>(ImportController);
-        csvImportService = module.get<CsvImportService>(CsvImportService);
+        controller = module.get(ImportController);
+        csvImportService = module.get(CsvImportService);
     });
 
     afterEach(() => {

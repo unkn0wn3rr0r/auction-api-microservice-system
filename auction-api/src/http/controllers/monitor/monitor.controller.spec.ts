@@ -22,8 +22,8 @@ describe('MonitorController', () => {
             ],
         }).compile();
 
-        controller = module.get<MonitorController>(MonitorController);
-        service = module.get<MonitorService>(MonitorService);
+        controller = module.get(MonitorController);
+        service = module.get(MonitorService);
     });
 
     afterEach(() => {

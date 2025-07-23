@@ -27,8 +27,8 @@ describe('AuctionController', () => {
             ],
         }).compile();
 
-        controller = module.get<AuctionController>(AuctionController);
-        service = module.get<AuctionService>(AuctionService);
+        controller = module.get(AuctionController);
+        service = module.get(AuctionService);
 
         jest.clearAllMocks();
     });
