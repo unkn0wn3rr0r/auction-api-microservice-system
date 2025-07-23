@@ -29,7 +29,7 @@ export class AuctionController {
     return this.service.findAllAuctionItems(l, s);
   }
 
-  @Post('/new')
+  @Post('/')
   async create(@Body() item: AuctionItem): Promise<AuctionItem> {
     return this.service.createAuctionItem(item);
   }
