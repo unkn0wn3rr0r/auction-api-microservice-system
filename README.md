@@ -128,7 +128,7 @@ curl -X POST http://localhost:3001/auth/validate \
 
 ### POST - Create new item
 ```bash
-curl -X POST http://localhost:3000/items/new \
+curl -X POST http://localhost:3000/items \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Mona Lisa",
