@@ -40,7 +40,7 @@ npm install
 
 ### 2. Running Locally (with Docker Compose):
 
-From the project root folder - ./Barnebys-Backend-Developer-Coding-Test run:
+From the project root folder - ./auction-api-microservice-system run:
 ```bash
 docker-compose up --build
 ```
