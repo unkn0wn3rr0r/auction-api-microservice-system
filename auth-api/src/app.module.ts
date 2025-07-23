@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ServiceModule } from './services/service.module';
+import { ServiceModule } from './core/services/service.module';
 import { ConfigModule } from '@nestjs/config';
-import { ControllerModule } from './routes/controller.module';
+import { ControllerModule } from './http/controllers/controller.module';
 import { PersistenceModule } from './persistence/persistence.module';
 
 @Module({

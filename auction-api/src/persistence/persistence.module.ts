@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { mongoClientProvider } from './mongo-client';
-import { MongoAuctionRepository } from './auction.repository';
-import { AuctionRepository } from '../models/auction';
+import { mongoClientProvider } from './client/mongo-client';
+import { MongoAuctionRepository } from './repositories/auction/mongo.auction.repository';
+import { AuctionRepository } from '../utils/models/auction';
 import { MONGO_CLIENT } from 'src/utils/constants';
 
 @Module({

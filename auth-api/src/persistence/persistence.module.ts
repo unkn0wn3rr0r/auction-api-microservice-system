@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { mongoClientProvider } from './mongo-client';
+import { mongoClientProvider } from './client/mongo-client';
 import { MONGO_CLIENT } from 'src/utils/constants';
 
 @Module({

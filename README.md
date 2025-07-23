@@ -165,13 +165,3 @@ curl "http://localhost:3000/items/search?q=italian"
 ```bash
 curl "http://localhost:3000/monitor"
 ```
-
----
-
-## Future improvements:
-
-1. Better import of the CSV data - through mongo on application startup, terminal command or something else.
-2. Usage of Data Transfer Objects (DTOs).
-3. Basic validation and error handling - it could be greatly improved.
-4. Better application structure and reorganisation of the project - folders, files, etc.
-5. Adding middlewares, interceptors or guards, if the project grows and the business requirements get more complicated - these would be valuable for future features like authentication, rate limiting and many others.
