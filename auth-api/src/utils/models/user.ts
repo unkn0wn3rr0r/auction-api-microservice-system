@@ -7,11 +7,13 @@ export interface UserCredentials {
 
 export interface UserCredentialsEntity extends UserCredentials {
     _id: ObjectId;
+    tokenVersion: number;
 }
 
 export interface UserJwtPayload {
-    email: string
+    email: string;
     sub: string;
-    exp: number
-    iat: number
+    iat: number;
+    exp: number;
+    tokenVersion: number;
 }

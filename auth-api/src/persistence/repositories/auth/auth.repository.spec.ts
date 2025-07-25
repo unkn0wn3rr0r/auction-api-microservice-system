@@ -16,12 +16,14 @@ describe('AuthRepository', () => {
     const sampleUserEntity: UserCredentialsEntity = {
         ...sampleUser,
         _id: new ObjectId(),
+        tokenVersion: 0,
     };
 
     beforeEach(() => {
         mockCollection = {
             findOne: jest.fn(),
             insertOne: jest.fn(),
+            updateOne: jest.fn(),
         };
 
         mockDb = {
@@ -70,13 +72,12 @@ describe('AuthRepository', () => {
 
             await expect(repository.createUserCredentials(sampleUser)).resolves.toBeUndefined();
 
-            expect(mockCollection.insertOne).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    email: sampleUser.email,
-                    password: sampleUser.password,
-                    _id: expect.any(ObjectId),
-                }),
-            );
+            expect(mockCollection.insertOne).toHaveBeenCalledWith({
+                _id: expect.any(ObjectId),
+                email: sampleUser.email,
+                password: sampleUser.password,
+                tokenVersion: 0,
+            });
             expect(mockCollection.insertOne).toHaveBeenCalledTimes(1);
             expect(errorSpy).toHaveBeenCalledTimes(0);
         });
@@ -119,6 +120,78 @@ describe('AuthRepository', () => {
             expect(result).toBe(false);
             expect(mockCollection.findOne).toHaveBeenCalledWith({ email: sampleUser.email });
             expect(mockCollection.findOne).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('incrementTokenVersion', () => {
+        let errorSpy: jest.SpyInstance;
+
+        beforeEach(() => {
+            errorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation(jest.fn());
+        });
+
+        it('should succeed when update is acknowledged and modifies one document', async () => {
+            (mockCollection.updateOne as jest.Mock).mockResolvedValue({
+                acknowledged: true,
+                matchedCount: 1,
+                modifiedCount: 1,
+            });
+
+            const userId = new ObjectId();
+            await expect(repository.incrementTokenVersion(userId)).resolves.not.toThrow();
+            expect(mockCollection.updateOne).toHaveBeenCalledWith(
+                { _id: userId },
+                { $inc: { tokenVersion: 1 } },
+            );
+            expect(errorSpy).toHaveBeenCalledTimes(0);
+        });
+
+        it('should throw an error when update is not acknowledged', async () => {
+            (mockCollection.updateOne as jest.Mock).mockResolvedValue({
+                acknowledged: false,
+                matchedCount: 1,
+                modifiedCount: 1,
+            });
+
+            const userId = new ObjectId();
+            await expect(repository.incrementTokenVersion(userId)).rejects.toThrow('Failed to update token version');
+            expect(errorSpy).toHaveBeenCalledWith('Failed to increment token version: Failed to update token version');
+            expect(errorSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it('should throw an error when no document is matched', async () => {
+            (mockCollection.updateOne as jest.Mock).mockResolvedValue({
+                acknowledged: true,
+                matchedCount: 0,
+                modifiedCount: 1,
+            });
+
+            const userId = new ObjectId();
+            await expect(repository.incrementTokenVersion(userId)).rejects.toThrow('Failed to update token version');
+            expect(errorSpy).toHaveBeenCalledWith('Failed to increment token version: Failed to update token version');
+            expect(errorSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it('should throw an error when no document is modified', async () => {
+            (mockCollection.updateOne as jest.Mock).mockResolvedValue({
+                acknowledged: true,
+                matchedCount: 1,
+                modifiedCount: 0,
+            });
+
+            const userId = new ObjectId();
+            await expect(repository.incrementTokenVersion(userId)).rejects.toThrow('Failed to update token version');
+            expect(errorSpy).toHaveBeenCalledWith('Failed to increment token version: Failed to update token version');
+            expect(errorSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it('should throw an error when updateOne throws', async () => {
+            (mockCollection.updateOne as jest.Mock).mockRejectedValue(new Error('DB error'));
+
+            const userId = new ObjectId();
+            await expect(repository.incrementTokenVersion(userId)).rejects.toThrow('DB error');
+            expect(errorSpy).toHaveBeenCalledWith('Failed to increment token version: DB error');
+            expect(errorSpy).toHaveBeenCalledTimes(1);
         });
     });
 });

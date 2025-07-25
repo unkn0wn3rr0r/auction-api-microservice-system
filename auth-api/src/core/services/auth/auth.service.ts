@@ -7,12 +7,6 @@ import * as bcrypt from 'bcrypt';
 import { InvalidCredentialsException, UserAlreadyExistsException } from 'src/utils/custom-errors';
 import { UserJwtPayload } from 'src/utils/models/user';
 
-/*
-    TODO: 
-    
-    Delete old jwt tokens or cache calls when the user tries to create a jwt, when he already has one.
-*/
-
 @Injectable()
 export class AuthService {
     private readonly jwtSecret: string;
@@ -43,7 +37,12 @@ export class AuthService {
             throw new InvalidCredentialsException('Invalid credentials');
         }
 
-        const payload = { sub: user._id.toHexString(), email: user.email };
+        await this.repository.incrementTokenVersion(user._id);
+        const payload = {
+            sub: user._id.toHexString(),
+            email: user.email,
+            tokenVersion: user.tokenVersion + 1,
+        };
         return {
             access_token: await this.jwtService.signAsync(payload, { secret: this.jwtSecret }),
         };
@@ -52,7 +51,7 @@ export class AuthService {
     async validateToken(token: string): Promise<UserJwtPayload> {
         const userJwtPayload = await this.jwtService.verifyAsync<UserJwtPayload>(token, { secret: this.jwtSecret }); // that throws if the token is invalid/malformed
         const user = await this.repository.findUserByEmail(userJwtPayload.email);
-        if (user == null) {
+        if (user == null || user.tokenVersion !== userJwtPayload.tokenVersion) {
             throw new InvalidCredentialsException('Invalid credentials');
         }
         return userJwtPayload;

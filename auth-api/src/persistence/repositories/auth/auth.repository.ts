@@ -18,7 +18,7 @@ export class AuthRepository {
 
     async createUserCredentials(user: UserCredentials): Promise<void> {
         try {
-            const result = await this.authCollection.insertOne({ ...user, _id: new ObjectId() });
+            const result = await this.authCollection.insertOne({ ...user, _id: new ObjectId(), tokenVersion: 0 });
             if (!result.acknowledged) {
                 throw new Error(`Failed to create user credentials for ${user.email}`);
             }
@@ -31,5 +31,17 @@ export class AuthRepository {
     async userExists(email: string): Promise<boolean> {
         const user = await this.findUserByEmail(email);
         return !!user;
+    }
+
+    async incrementTokenVersion(userId: ObjectId): Promise<void> {
+        try {
+            const result = await this.authCollection.updateOne({ _id: userId }, { $inc: { tokenVersion: 1 } });
+            if (!result.acknowledged || !result.matchedCount || !result.modifiedCount) {
+                throw new Error('Failed to update token version');
+            }
+        } catch (error) {
+            this.logger.error(`Failed to increment token version: ${error.message}`);
+            throw error;
+        }
     }
 }
