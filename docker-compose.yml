@@ -6,10 +6,7 @@ services:
     ports:
       - "3000:3000"
       - "9229:9229"
-    environment:
-      - JWT_SECRET=supersecurejwtsecret
-      - JWT_EXPIRES_IN=1h
-      - MONGODB_URI=mongodb://mongodb:27017/auction
+    env_file: .env.auction
     volumes:
       - ./auction-api:/auction-api/app
       - ./auction-api/files:/auction-api/app/files
@@ -24,10 +21,7 @@ services:
     ports:
       - "3001:3001"
       - "9230:9230"
-    environment:
-      - JWT_SECRET=supersecurejwtsecret
-      - JWT_EXPIRES_IN=1h
-      - MONGODB_URI=mongodb://mongodb:27017/auth
+    env_file: .env.auth
     volumes:
       - ./auth-api:/auth-api/app
     command: npm run start:debug -- --preserveWatchOutput true
