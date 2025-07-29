@@ -122,13 +122,18 @@ curl -X POST http://localhost:3001/auth/validate \
   }'
 ```
 
+### GET - App health check
+```bash
+curl "http://localhost:3001/auth/monitor"
+```
+
 ---
 
 ## auction-api
 
 ### POST - Create new item
 ```bash
-curl -X POST http://localhost:3000/items \
+curl -X POST http://localhost:3000/auction/items \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Mona Lisa",
@@ -141,27 +146,27 @@ curl -X POST http://localhost:3000/items \
 
 ### POST - Import CSV data - use a jwt created from the auth-api examples
 ```bash
-curl -X POST http://localhost:3000/import/csv \
+curl -X POST http://localhost:3000/auction/import/csv \
   -H "Authorization: Bearer YOUR-JWT-TOKEN" \
   -H "Content-Type: application/json"
 ```
 
 ### GET - Get item details by ID - use mongo object id string as ID
 ```bash
-curl "http://localhost:3000/items/6873c5f005b0a564af54d12d"
+curl "http://localhost:3000/auction/items/6873c5f005b0a564af54d12d"
 ```
 
 ### GET - Get items with pagination
 ```bash
-curl "http://localhost:3000/items?limit=1&skip=0"
+curl "http://localhost:3000/auction/items?limit=1&skip=0"
 ```
 
 ### GET - Search items
 ```bash
-curl "http://localhost:3000/items/search?q=italian"
+curl "http://localhost:3000/auction/items/search?q=italian"
 ```
 
-### GET - Check if db is healthy - useful for k8s
+### GET - Apps health check
 ```bash
-curl "http://localhost:3000/monitor"
+curl "http://localhost:3000/auction/monitor"
 ```
