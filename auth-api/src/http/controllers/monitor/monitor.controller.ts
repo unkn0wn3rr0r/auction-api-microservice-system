@@ -2,8 +2,8 @@ import {
     Controller,
     Get,
 } from '@nestjs/common';
-import { MonitorStatusResponse } from 'src/utils/models/monitor';
 import { MonitorService } from 'src/core/services/monitor/monitor.service';
+import { MonitorStatusResponse } from 'src/utils/models/monitor';
 
 @Controller('/monitor')
 export class MonitorController {
@@ -11,6 +11,7 @@ export class MonitorController {
 
     @Get()
     async checkHealth(): Promise<MonitorStatusResponse> {
-        return this.service.checkHealth();
+        const isAppHealthy = await this.service.checkHealth();
+        return { status: isAppHealthy ? 'ok' : 'fail' };
     }
 }

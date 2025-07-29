@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PersistenceModule } from 'src/persistence/persistence.module';
 import { JWT_SECRET_EXPIRATION_NAME, JWT_SECRET_NAME } from 'src/utils/constants';
 import { AuthRepository } from 'src/persistence/repositories/auth/auth.repository';
+import { MonitorService } from './monitor/monitor.service';
 
 @Module({
   imports: [
@@ -23,7 +24,11 @@ import { AuthRepository } from 'src/persistence/repositories/auth/auth.repositor
   providers: [
     AuthService,
     AuthRepository,
+    MonitorService,
   ],
-  exports: [AuthService],
+  exports: [
+    AuthService,
+    MonitorService,
+  ],
 })
 export class ServiceModule { }

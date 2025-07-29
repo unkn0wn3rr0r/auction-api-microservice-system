@@ -3,12 +3,6 @@ import * as csvParser from 'csv-parser';
 import { Readable } from 'stream';
 import { AuctionItem, AuctionItemCsvFormat, AuctionRepository } from 'src/utils/models/auction';
 
-/*
-  TODO:
-  
-  That service can be improved by not coupling the headers to that exact format of names.
-  Also better validation and utilization of the library (csv-parser) can be done.
-*/
 @Injectable()
 export class CsvImportService {
   private readonly logger = new Logger(CsvImportService.name);
@@ -16,11 +10,10 @@ export class CsvImportService {
   constructor(private readonly repository: AuctionRepository) { }
 
   async importCsvData(buffer: Buffer): Promise<number> {
-    const stream = Readable.from(buffer);
     const items: AuctionItem[] = [];
 
     return new Promise((resolve, reject) => {
-      stream
+      Readable.from(buffer)
         .pipe(csvParser({
           mapHeaders: ({ header }) => header.toLowerCase(),
         }))

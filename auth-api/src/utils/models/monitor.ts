@@ -1,3 +1,3 @@
 export interface MonitorStatusResponse {
-    status: Record<string, 'up' | 'down'>;
+    status: 'ok' | 'fail';
 }

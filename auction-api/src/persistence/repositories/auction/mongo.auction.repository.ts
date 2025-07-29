@@ -58,7 +58,7 @@ export class MongoAuctionRepository extends AuctionRepository {
       const result = await this.db.command({ ping: 1 });
       return result.ok === 1;
     } catch (error) {
-      this.logger.error(`Health check failed: ${error.message}`);
+      this.logger.error(`DB health check failed: ${error.message}`);
       return false;
     }
   }

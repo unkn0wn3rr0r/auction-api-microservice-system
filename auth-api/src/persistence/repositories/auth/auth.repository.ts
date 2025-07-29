@@ -44,4 +44,14 @@ export class AuthRepository {
             throw error;
         }
     }
+
+    async isHealthy(): Promise<boolean> {
+        try {
+            const result = await this.db.command({ ping: 1 });
+            return result.ok === 1;
+        } catch (error) {
+            this.logger.error(`DB health check failed: ${error.message}`);
+            return false;
+        }
+    }
 }

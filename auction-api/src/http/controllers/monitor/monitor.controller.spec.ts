@@ -1,28 +1,28 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MonitorController } from './monitor.controller';
 import { MonitorService } from 'src/core/services/monitor/monitor.service';
+import { AuthTransportationService } from 'src/core/services/transport/auth.transportation.service';
+import { AuctionRepository } from 'src/utils/models/auction';
 import { MonitorStatusResponse } from 'src/utils/models/monitor';
 
-describe('MonitorController', () => {
-    let controller: MonitorController;
+describe('MonitorService', () => {
     let service: MonitorService;
 
-    const mockMonitorService = {
-        checkHealth: jest.fn(),
+    const mockAuthService = {
+        isHealthy: jest.fn(),
+    };
+    const mockAuctionRepository = {
+        isHealthy: jest.fn(),
     };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            controllers: [MonitorController],
             providers: [
-                {
-                    provide: MonitorService,
-                    useValue: mockMonitorService,
-                },
+                MonitorService,
+                { provide: AuthTransportationService, useValue: mockAuthService },
+                { provide: AuctionRepository, useValue: mockAuctionRepository },
             ],
         }).compile();
 
-        controller = module.get(MonitorController);
         service = module.get(MonitorService);
     });
 
@@ -30,27 +30,57 @@ describe('MonitorController', () => {
         jest.clearAllMocks();
     });
 
-    it('should return status ok if db is healthy', async () => {
-        mockMonitorService.checkHealth.mockResolvedValue(true);
+    it('should return up for both auth and db when healthy', async () => {
+        mockAuthService.isHealthy.mockResolvedValue(true);
+        mockAuctionRepository.isHealthy.mockResolvedValue(true);
 
-        const response: MonitorStatusResponse = await controller.checkHealth();
+        const result: MonitorStatusResponse = await service.checkHealth();
 
-        expect(response).toEqual({
-            status: 'ok',
-            details: {
+        expect(result).toEqual({
+            status: {
+                auth: 'up',
                 db: 'up',
             },
         });
     });
 
-    it('should return status fail if db is down', async () => {
-        mockMonitorService.checkHealth.mockResolvedValue(false);
+    it('should return down for auth when auth is unhealthy', async () => {
+        mockAuthService.isHealthy.mockResolvedValue(false);
+        mockAuctionRepository.isHealthy.mockResolvedValue(true);
 
-        const response: MonitorStatusResponse = await controller.checkHealth();
+        const result = await service.checkHealth();
 
-        expect(response).toEqual({
-            status: 'fail',
-            details: {
+        expect(result).toEqual({
+            status: {
+                auth: 'down',
+                db: 'up',
+            },
+        });
+    });
+
+    it('should return down for db when db is unhealthy', async () => {
+        mockAuthService.isHealthy.mockResolvedValue(true);
+        mockAuctionRepository.isHealthy.mockResolvedValue(false);
+
+        const result = await service.checkHealth();
+
+        expect(result).toEqual({
+            status: {
+                auth: 'up',
+                db: 'down',
+            },
+        });
+    });
+
+    it('should return down for both when both are unhealthy', async () => {
+        mockAuthService.isHealthy.mockResolvedValue(false);
+        mockAuctionRepository.isHealthy.mockResolvedValue(false);
+
+        const result = await service.checkHealth();
+
+        expect(result).toEqual({
+            status: {
+                auth: 'down',
                 db: 'down',
             },
         });

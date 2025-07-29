@@ -18,4 +18,14 @@ export class AuthTransportationService {
             throw error;
         }
     }
+
+    async isHealthy(): Promise<boolean> {
+        try {
+            const response = await firstValueFrom(this.httpService.get(`${this.baseUrl}/monitor`));
+            return response.data?.status === 'ok';
+        } catch (error) {
+            this.logger.error(`Auth API health check failed: ${error.message}`);
+            return false;
+        }
+    }
 }

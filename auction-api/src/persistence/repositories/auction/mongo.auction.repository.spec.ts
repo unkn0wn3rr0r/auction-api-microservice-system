@@ -41,7 +41,7 @@ describe('AuctionRepository', () => {
 
         repository = new MongoAuctionRepository(mockDb as Db);
 
-        Reflect.set(repository, 'logger', mockLogger); // that's a small trick i like to use, set the logger without changing the property from public to private
+        Reflect.set(repository, 'logger', mockLogger);
     });
 
     it('should find an auction item by ID', async () => {
@@ -147,25 +147,27 @@ describe('AuctionRepository', () => {
         });
     });
 
-    it('should return true when db is healthy', async () => {
-        (mockDb.command as jest.Mock).mockResolvedValue({ ok: 1 });
+    describe('isHealthy', () => {
+        it('should return true when db is healthy', async () => {
+            (mockDb.command as jest.Mock).mockResolvedValue({ ok: 1 });
 
-        const result = await repository.isHealthy();
+            const result = await repository.isHealthy();
 
-        expect(result).toBe(true);
-        expect(mockDb.command).toHaveBeenCalledWith({ ping: 1 });
-        expect(mockDb.command).toHaveBeenCalledTimes(1);
-        expect(mockLogger.error).toHaveBeenCalledTimes(0);
-    });
+            expect(result).toBe(true);
+            expect(mockDb.command).toHaveBeenCalledWith({ ping: 1 });
+            expect(mockDb.command).toHaveBeenCalledTimes(1);
+            expect(mockLogger.error).toHaveBeenCalledTimes(0);
+        });
 
-    it('should return false when db is unhealthy', async () => {
-        (mockDb.command as jest.Mock).mockRejectedValue(new Error('Connection failed'));
+        it('should return false when db is unhealthy', async () => {
+            (mockDb.command as jest.Mock).mockRejectedValue(new Error('Connection failed'));
 
-        const result = await repository.isHealthy();
+            const result = await repository.isHealthy();
 
-        expect(result).toBe(false);
-        expect(mockDb.command).toHaveBeenCalledTimes(1);
-        expect(mockLogger.error).toHaveBeenCalledWith('Health check failed: Connection failed');
-        expect(mockLogger.error).toHaveBeenCalledTimes(1);
+            expect(result).toBe(false);
+            expect(mockDb.command).toHaveBeenCalledTimes(1);
+            expect(mockLogger.error).toHaveBeenCalledWith('DB health check failed: Connection failed');
+            expect(mockLogger.error).toHaveBeenCalledTimes(1);
+        });
     });
 });

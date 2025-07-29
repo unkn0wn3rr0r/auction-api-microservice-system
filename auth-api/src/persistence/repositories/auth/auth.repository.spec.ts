@@ -28,6 +28,7 @@ describe('AuthRepository', () => {
 
         mockDb = {
             collection: jest.fn().mockReturnValue(mockCollection),
+            command: jest.fn(),
         };
 
         repository = new AuthRepository(mockDb as Db);
@@ -191,6 +192,36 @@ describe('AuthRepository', () => {
             const userId = new ObjectId();
             await expect(repository.incrementTokenVersion(userId)).rejects.toThrow('DB error');
             expect(errorSpy).toHaveBeenCalledWith('Failed to increment token version: DB error');
+            expect(errorSpy).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('isHealthy', () => {
+        let errorSpy: jest.SpyInstance;
+
+        beforeEach(() => {
+            errorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation(jest.fn());
+        });
+
+        it('should return true when db is healthy', async () => {
+            (mockDb.command as jest.Mock).mockResolvedValue({ ok: 1 });
+
+            const result = await repository.isHealthy();
+
+            expect(result).toBe(true);
+            expect(mockDb.command).toHaveBeenCalledWith({ ping: 1 });
+            expect(mockDb.command).toHaveBeenCalledTimes(1);
+            expect(errorSpy).toHaveBeenCalledTimes(0);
+        });
+
+        it('should return false when db is unhealthy', async () => {
+            (mockDb.command as jest.Mock).mockRejectedValue(new Error('Connection failed'));
+
+            const result = await repository.isHealthy();
+
+            expect(result).toBe(false);
+            expect(mockDb.command).toHaveBeenCalledTimes(1);
+            expect(errorSpy).toHaveBeenCalledWith('DB health check failed: Connection failed');
             expect(errorSpy).toHaveBeenCalledTimes(1);
         });
     });
