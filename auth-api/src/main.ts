@@ -1,10 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('auth', { exclude: ['/auth/login', '/auth/register', '/auth/validate'] });
-  await app.listen(process.env.PORT ?? 3001);
+  await app.listen(process.env.PORT ?? 3001, '0.0.0.0');
+  console.log(`auth-api listening on: ${await app.getUrl()}/auth`);
 }
 
-bootstrap().catch(console.error);
+bootstrap().catch((error) => {
+  console.error(error);
+  process.exit(-1);
+});

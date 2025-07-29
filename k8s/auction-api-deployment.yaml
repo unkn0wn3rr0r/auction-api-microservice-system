@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: my-app
   name: auction-api
 spec:
   replicas: 2
@@ -14,10 +15,10 @@ spec:
     spec:
       containers:
         - name: auction-api
-          image: kstoyanovw/auction-api:v1.6
+          image: kstoyanovw/auction-api:v1.7
           ports:
             - containerPort: 3000
-            - containerPort: 9229 
+            - containerPort: 9229
           env:
             - name: JWT_SECRET
               value: "supersecurejwtsecret"

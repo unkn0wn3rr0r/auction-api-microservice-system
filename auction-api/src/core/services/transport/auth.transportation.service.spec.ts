@@ -88,7 +88,7 @@ describe('AuthTransportationService', () => {
 
             const result = await authTransportationService.isHealthy();
             expect(result).toBe(true);
-            expect(httpService.get).toHaveBeenCalledWith('http://auth-api:3001/auth/monitor');
+            expect(httpService.get).toHaveBeenCalledWith('http://auth-api:3001/monitor');
             expect(loggerSpy).toHaveBeenCalledTimes(0);
         });
 
@@ -97,7 +97,7 @@ describe('AuthTransportationService', () => {
 
             const result = await authTransportationService.isHealthy();
             expect(result).toBe(false);
-            expect(httpService.get).toHaveBeenCalledWith('http://auth-api:3001/auth/monitor');
+            expect(httpService.get).toHaveBeenCalledWith('http://auth-api:3001/monitor');
             expect(loggerSpy).toHaveBeenCalledTimes(0);
         });
 
@@ -106,7 +106,7 @@ describe('AuthTransportationService', () => {
 
             const result = await authTransportationService.isHealthy();
             expect(result).toBe(false);
-            expect(httpService.get).toHaveBeenCalledWith('http://auth-api:3001/auth/monitor');
+            expect(httpService.get).toHaveBeenCalledWith('http://auth-api:3001/monitor');
             expect(loggerSpy).toHaveBeenCalledTimes(1);
             expect(loggerSpy).toHaveBeenCalledWith('Auth API health check failed: Service down');
         });
