@@ -20,7 +20,7 @@ export class AuthController {
     }
 
     @Post('/login')
-    async login(@Body() credentials: UserCredentials): Promise<{ access_token: string }> {
+    async login(@Body() credentials: UserCredentials): Promise<{ accessToken: string }> {
         try {
             return await this.authService.login(credentials.email, credentials.password);
         } catch (error) {

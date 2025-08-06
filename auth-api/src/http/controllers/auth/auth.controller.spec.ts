@@ -61,14 +61,14 @@ describe('AuthController', () => {
 
   describe('login', () => {
     it('should return a token on successful login', async () => {
-      authService.login.mockResolvedValue({ access_token: 'token123' });
+      authService.login.mockResolvedValue({ accessToken: 'token123' });
 
       const result = await controller.login({
         email: 'test@example.com',
         password: 'password',
       });
 
-      expect(result).toEqual({ access_token: 'token123' });
+      expect(result).toEqual({ accessToken: 'token123' });
       expect(authService.login).toHaveBeenCalledWith('test@example.com', 'password');
       expect(authService.login).toHaveBeenCalledTimes(1);
     });

@@ -94,7 +94,7 @@ describe('AuthService', () => {
       jwtService.signAsync.mockResolvedValue('jwt-token');
 
       const result = await authService.login('user@example.com', 'pass');
-      expect(result).toEqual({ access_token: 'jwt-token' });
+      expect(result).toEqual({ accessToken: 'jwt-token' });
       expect(jwtService.signAsync).toHaveBeenCalledWith(
         {
           sub: userId.toHexString(),

@@ -31,7 +31,7 @@ export class AuthService {
         return { message: `User ${email} registered` };
     }
 
-    async login(email: string, password: string): Promise<{ access_token: string }> {
+    async login(email: string, password: string): Promise<{ accessToken: string }> {
         const user = await this.repository.findUserByEmail(email);
         if (user == null || !(await bcrypt.compare(password, user.password))) {
             throw new InvalidCredentialsException('Invalid credentials');
@@ -44,7 +44,7 @@ export class AuthService {
             tokenVersion: user.tokenVersion + 1,
         };
         return {
-            access_token: await this.jwtService.signAsync(payload, { secret: this.jwtSecret }),
+            accessToken: await this.jwtService.signAsync(payload, { secret: this.jwtSecret }),
         };
     }
 
