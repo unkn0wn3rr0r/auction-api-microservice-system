@@ -3,9 +3,9 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthRepository } from 'src/persistence/repositories/auth/auth.repository';
 import { JWT_SECRET_NAME } from 'src/utils/constants';
-import * as bcrypt from 'bcrypt';
 import { InvalidCredentialsException, UserAlreadyExistsException } from 'src/utils/custom-errors';
 import { UserJwtPayload } from 'src/utils/models/user';
+import { HashingService } from 'src/utils/models/hash';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +14,7 @@ export class AuthService {
     constructor(
         private readonly configService: ConfigService,
         private readonly jwtService: JwtService,
+        private readonly hashingService: HashingService,
         private readonly repository: AuthRepository,
     ) {
         this.jwtSecret = this.getJwtSecret();
@@ -25,7 +26,7 @@ export class AuthService {
             throw new UserAlreadyExistsException('User already exists');
         }
 
-        const hashed = await bcrypt.hash(password, 10);
+        const hashed = await this.hashingService.hash(password);
         await this.repository.createUserCredentials({ email, password: hashed });
 
         return { message: `User ${email} registered` };
@@ -33,7 +34,7 @@ export class AuthService {
 
     async login(email: string, password: string): Promise<{ accessToken: string }> {
         const user = await this.repository.findUserByEmail(email);
-        if (user == null || !(await bcrypt.compare(password, user.password))) {
+        if (user == null || !(await this.hashingService.compare(password, user.password))) {
             throw new InvalidCredentialsException('Invalid credentials');
         }
 

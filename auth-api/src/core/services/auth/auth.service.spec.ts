@@ -1,22 +1,21 @@
 import { AuthRepository } from 'src/persistence/repositories/auth/auth.repository';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { ObjectId } from 'mongodb';
 import { InvalidCredentialsException, UserAlreadyExistsException } from 'src/utils/custom-errors';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JWT_SECRET_NAME } from 'src/utils/constants';
-
-jest.mock('bcrypt');
+import { HashingService } from 'src/utils/models/hash';
 
 describe('AuthService', () => {
   const jwtSecret = 'test-secret';
 
-  let configService: jest.Mocked<ConfigService>;
-  let repository: jest.Mocked<AuthRepository>;
-  let jwtService: jest.Mocked<JwtService>;
   let authService: AuthService;
+  let configService: jest.Mocked<ConfigService>;
+  let jwtService: jest.Mocked<JwtService>;
+  let hashingService: jest.Mocked<HashingService>;
+  let repository: jest.Mocked<AuthRepository>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,6 +28,20 @@ describe('AuthService', () => {
           },
         },
         {
+          provide: JwtService,
+          useValue: {
+            signAsync: jest.fn(),
+            verifyAsync: jest.fn(),
+          },
+        },
+        {
+          provide: HashingService,
+          useValue: {
+            hash: jest.fn(),
+            compare: jest.fn(),
+          },
+        },
+        {
           provide: AuthRepository,
           useValue: {
             userExists: jest.fn(),
@@ -37,20 +50,14 @@ describe('AuthService', () => {
             incrementTokenVersion: jest.fn(),
           },
         },
-        {
-          provide: JwtService,
-          useValue: {
-            signAsync: jest.fn(),
-            verifyAsync: jest.fn(),
-          },
-        },
       ],
     }).compile();
 
-    configService = module.get(ConfigService);
-    repository = module.get(AuthRepository);
-    jwtService = module.get(JwtService);
     authService = module.get(AuthService);
+    configService = module.get(ConfigService);
+    jwtService = module.get(JwtService);
+    hashingService = module.get(HashingService);
+    repository = module.get(AuthRepository);
   });
 
   describe('jwt secret', () => {
@@ -64,7 +71,7 @@ describe('AuthService', () => {
   describe('register', () => {
     it('should register a new user credentials', async () => {
       repository.userExists.mockResolvedValue(false);
-      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed123');
+      (hashingService.hash as jest.Mock).mockResolvedValue('hashed123');
 
       const result = await authService.register('user@example.com', 'pass');
       expect(result).toEqual({ message: 'User user@example.com registered' });
@@ -73,11 +80,14 @@ describe('AuthService', () => {
         password: 'hashed123',
       });
       expect(repository.createUserCredentials).toHaveBeenCalledTimes(1);
+      expect(hashingService.hash).toHaveBeenCalledWith('pass');
+      expect(hashingService.hash).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error if user credentials already exist', async () => {
       repository.userExists.mockResolvedValue(true);
       await expect(authService.register('user@example.com', 'pass')).rejects.toThrow(new UserAlreadyExistsException('User already exists'));
+      expect(hashingService.hash).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -90,7 +100,7 @@ describe('AuthService', () => {
         password: 'hashed',
         tokenVersion: 0,
       });
-      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (hashingService.compare as jest.Mock).mockResolvedValue(true);
       jwtService.signAsync.mockResolvedValue('jwt-token');
 
       const result = await authService.login('user@example.com', 'pass');
@@ -108,6 +118,8 @@ describe('AuthService', () => {
       expect(jwtService.signAsync).toHaveBeenCalledTimes(1);
       expect(repository.incrementTokenVersion).toHaveBeenCalledWith(userId);
       expect(repository.incrementTokenVersion).toHaveBeenCalledTimes(1);
+      expect(hashingService.compare).toHaveBeenCalledWith('pass', 'hashed');
+      expect(hashingService.compare).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error if user credentials are invalid', async () => {
@@ -115,6 +127,7 @@ describe('AuthService', () => {
 
       await expect(authService.login('user@example.com', 'some password')).rejects.toThrow(new InvalidCredentialsException('Invalid credentials'));
       expect(repository.incrementTokenVersion).toHaveBeenCalledTimes(0);
+      expect(hashingService.compare).toHaveBeenCalledTimes(0);
     });
 
     it('should throw an error if user password is incorrect', async () => {
@@ -124,10 +137,12 @@ describe('AuthService', () => {
         password: 'hashed',
         tokenVersion: 0,
       });
-      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+      (hashingService.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(authService.login('user@example.com', 'wrong')).rejects.toThrow(new InvalidCredentialsException('Invalid credentials'));
       expect(repository.incrementTokenVersion).toHaveBeenCalledTimes(0);
+      expect(hashingService.compare).toHaveBeenCalledWith('wrong', 'hashed');
+      expect(hashingService.compare).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -6,6 +6,8 @@ import { PersistenceModule } from 'src/persistence/persistence.module';
 import { JWT_SECRET_EXPIRATION_NAME, JWT_SECRET_NAME } from 'src/utils/constants';
 import { AuthRepository } from 'src/persistence/repositories/auth/auth.repository';
 import { MonitorService } from './monitor/monitor.service';
+import { HashingService } from 'src/utils/models/hash';
+import { BcryptService } from './hash/bcrypt.service';
 
 @Module({
   imports: [
@@ -25,6 +27,10 @@ import { MonitorService } from './monitor/monitor.service';
     AuthService,
     AuthRepository,
     MonitorService,
+    {
+      provide: HashingService,
+      useClass: BcryptService,
+    }
   ],
   exports: [
     AuthService,
